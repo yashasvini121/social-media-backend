@@ -18,6 +18,9 @@ exports.getCommentsByPostId = async (req, res) => {
       "SELECT * FROM comments WHERE post_id = $1",
       [post_id]
     );
+    if (result.rows.length === 0) {   // NOTE: This isn't giving any error for invalid post_id because the query is returning an empty array
+      return res.status(404).json({ error: "Post not found" });
+    }
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
@@ -92,7 +95,6 @@ exports.updateComment = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 exports.deleteComment = async (req, res) => {
   const { comment_id } = req.params;
