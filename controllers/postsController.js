@@ -23,14 +23,6 @@ exports.createPost = async (req, res) => {
   //   return res.status(403).json({ error: "Forbidden" });
   // }
 
-  // Checking if the user_id exists
-  const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
-    user_id,
-  ]);
-  if (user.rows.length === 0) {
-    return res.status(404).json({ error: "User not found" });
-  }
-
   try {
     const result = await pool.query(
       "INSERT INTO posts (user_id, content, media_type, media_url, teacher_verified) VALUES ($1, $2, $3, $4, $5) RETURNING *",
@@ -40,7 +32,12 @@ exports.createPost = async (req, res) => {
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    if (error.code === "23503") {
+      res.status(404).json({ error: "User not found" });
+    }
+    else {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   }
 };
 
