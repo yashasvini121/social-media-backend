@@ -1,24 +1,39 @@
 const pool = require("../config/db");
 
-exports.likePost = async (req, res) => {
-  const { post_id, user_id } = req.body;
+exports.like = async (req, res) => {
+  const { user_id, post_id, comment_id } = req.body;
 
-  if (!user_id || !post_id) {
-    return res.status(400).json({ error: "Missing post_id or user_id" });
+  if (!user_id || (!post_id && !comment_id)) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const result = await pool.query(
-      "INSERT INTO likes (post_id, user_id) VALUES ($1, $2) RETURNING *",
-      [post_id, user_id]
-    );
+    let query, values;
+
+    if (post_id) {
+      query =
+        "INSERT INTO likes (user_id, post_id) VALUES ($1, $2) RETURNING *";
+      values = [user_id, post_id];
+    } else if (comment_id) {
+      query =
+        "INSERT INTO likes (user_id, comment_id) VALUES ($1, $2) RETURNING *";
+      values = [user_id, comment_id];
+    }
+
+    const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error(error);
     if (error.code === "23505") {
-      res.status(409).json({ error: "User has already liked this post" });
+      res.status(409).json({ error: "Already liked" });
     }
-    else if (error.code === "23503") {
+    else if (error.code === "23503" && error.constraint === "likes_post_id_fkey") {
+      res.status(404).json({ error: "Post not found" });
+    }
+    else if (error.code === "23503" && error.constraint === "likes_comment_id_fkey") {
+      res.status(404).json({ error: "Comment not found" });
+    }
+    else if (error.code === "23503" && error.constraint === "likes_user_id_fkey") {
       res.status(404).json({ error: "User not found" });
     }
     else {
@@ -27,78 +42,33 @@ exports.likePost = async (req, res) => {
   }
 };
 
-exports.unlikePost = async (req, res) => {
-  const { post_id, user_id } = req.body;
+exports.unlike = async (req, res) => {
+  const { user_id, post_id, comment_id } = req.body;
 
-  if (!user_id || !post_id) {
-    return res.status(400).json({ error: "Missing post_id or user_id" });
+  if (!user_id || (!post_id && !comment_id)) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const result = await pool.query(
-      "DELETE FROM likes WHERE post_id = $1 AND user_id = $2 RETURNING *",
-      [post_id, user_id]
-    );
+    let query, values;
+
+    if (post_id) {
+      query =
+        "DELETE FROM likes WHERE user_id = $1 AND post_id = $2 RETURNING *";
+      values = [user_id, post_id];
+    } else if (comment_id) {
+      query =
+        "DELETE FROM likes WHERE user_id = $1 AND comment_id = $2 RETURNING *";
+      values = [user_id, comment_id];
+    }
+
+    const result = await pool.query(query, values);
     if (result.rows.length > 0) {
       res.status(200).json(result.rows[0]);
     } else {
       res.status(404).json({ error: "Like not found" });
     }
-  } catch (error) {
-    console.error(error);
-    if (error.code === "23505") {
-      res.status(404).json({ error: "User has already unliked this post" });
-    }
-    else if (error.code === "23503") {
-      res.status(404).json({ error: "user not found" });
-    }
-    else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-};
-
-exports.likeComment = async (req, res) => {
-  const { comment_id, user_id } = req.body;
-
-  if (!comment_id || !user_id) {
-    return res.status(400).json({ error: "Missing comment_id or user_id" });
-  }
-
-  try {
-    const result = await pool.query(
-      "INSERT INTO likes (comment_id, user_id) VALUES ($1, $2) RETURNING *",
-      [comment_id, user_id]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error(error);
-    if (error.code === "23505") {
-      res.status(409).json({ error: "User has already liked this comment" });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-}
-
-exports.unlikeComment = async (req, res) => {
-  const { comment_id, user_id } = req.body;
-
-  if (!comment_id || !user_id) {
-    return res.status(400).json({ error: "Missing comment_id or user_id" });
-  }
-
-  try {
-    const result = await pool.query(
-      "DELETE FROM likes WHERE comment_id = $1 AND user_id = $2 RETURNING *",
-      [comment_id, user_id]
-    );
-    if (result.rows.length > 0) {
-      res.status(200).json(result.rows[0]);
-    } else {
-      res.status(404).json({ error: "Like not found" });
-    }
-  } catch (error) {
+  } catch (error) {   // TODO: Add proper error handing here
     console.error(error);
     if (error.code === "23505") {
       res.status(409).json({ error: "User has already unliked this comment" });
