@@ -18,6 +18,7 @@ const pool = new Pool({
 app.use(bodyParser.json());
 
 
+// API endpoints for users
 app
 	.route("/api/users")
 	.get(async (req, res) => {
@@ -51,11 +52,42 @@ app
 				res.status(500).send("Internal Server Error");
 			}
 		}
-	});
+	})
+	.patch(async (req, res) => {
+		const { user_id } = req.body;
+		const { username, email, first_name, last_name, password } = req.body;
+
+		if (!user_id) {
+			return res.status(400).send("Missing user_id");
+		}
+
+		try {
+			const result = await pool.query(
+				"UPDATE users SET username = $1, email = $2, first_name = $3, last_name = $4, password = $5 WHERE user_id = $6 RETURNING *",
+				[username, email, first_name, last_name, password, user_id]
+			);
+			if (result.rows.length > 0) {
+				res.status(200).json(result.rows[0]);
+			} else {
+				res.status(404).send("User not found");
+			}
+		} catch (error) {
+			console.error(error);
+			if (error.code === "23505") {
+				// Unique violation
+				res.status(409).send("Username or email already exists");
+			} else {
+				res.status(500).send("Internal Server Error");
+			}
+		}
+	}
+	);
 
 
-// Get user by ID endpoint
-app.get('/api/users/:id', async (req, res) => {
+// API endpoints for user profile using user_id
+app
+	.route('/api/users/:id')
+	.get(async (req, res) => {
     const userId = req.params.id;
 
     try {
@@ -69,11 +101,53 @@ app.get('/api/users/:id', async (req, res) => {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
-});
+	})
+	.put(async (req, res) => {
+			const userId = req.params.id;
+			const { username, email, first_name, last_name, password } = req.body;
+
+			try {
+					const result = await pool.query(
+							`UPDATE users SET 
+									username = COALESCE($1, username), 
+									email = COALESCE($2, email), 
+									first_name = COALESCE($3, first_name), 
+									last_name = COALESCE($4, last_name), 
+									password = COALESCE($5, password) 
+							WHERE user_id = $6 RETURNING *`,
+							[username, email, first_name, last_name, password, userId]
+					);
+
+					if (result.rows.length > 0) {
+							res.status(200).json(result.rows[0]);
+					} else {
+							res.status(404).send('User not found');
+					}
+			} catch (error) {
+					console.error(error);
+					if (error.code === '23505') { // Unique violation
+							res.status(409).send('Username or email already exists');
+					} else {
+							res.status(500).send('Internal Server Error');
+					}
+			}
+	});
 
 
-// Create a new post endpoint
-app.post('/api/posts', async (req, res) => {
+
+// API endpoints for posts
+app
+	.route('/api/posts')
+	.get(async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM posts');
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+	})
+	.post(async (req, res) => {
     const { user_id, content, media_type, media_url, teacher_verified } = req.body;
 
     if (!user_id || !content) {
@@ -93,7 +167,7 @@ app.post('/api/posts', async (req, res) => {
 });
 
 
-// Like a post endpoint
+// API endpoints for likes
 app
 	.route("/api/posts/:post_id/like")
 	.post(async (req, res) => {
@@ -145,7 +219,8 @@ app
 			}
 	});
 
-// Add a comment to a post endpoint
+
+// API endpoints for comments 
 app
 	.route("/api/posts/:post_id/comments")
 	.get(async (req, res) => {
