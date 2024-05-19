@@ -4,7 +4,7 @@
   "description": "a simple social media platform for the students",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "npx nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Yashasvini Sharma",
