@@ -23,3 +23,6 @@
 `npm install`
 2. Start the server
 `npm start` or `node server.js`
+
+## Database ER Diagram
+![ER Diagram](./ER_Diagram.png)
