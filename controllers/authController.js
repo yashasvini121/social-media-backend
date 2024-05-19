@@ -2,6 +2,9 @@ const pool = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+require("dotenv").config();
+const JWT_SECRET = process.env.JWT_SECRET;
+
 exports.register = async (req, res) => {
   const { username, email, first_name, last_name, password } = req.body;
   try {
@@ -16,7 +19,7 @@ exports.register = async (req, res) => {
       [username, email, first_name, last_name, hashedPassword]
     );
 
-    const token = jwt.sign({ user_id: newUser.rows[0].user_id }, "yashasvini", {
+    const token = jwt.sign({ user_id: newUser.rows[0].user_id }, JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -41,7 +44,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { user_id: user.rows[0].user_id },
-      "yashasvini",
+      JWT_SECRET,
       {
         expiresIn: "1h",
       }
