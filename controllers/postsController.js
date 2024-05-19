@@ -88,3 +88,22 @@ exports.updatePostById = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.deletePostById = async (req, res) => {
+  const postId = req.params.id;
+
+  try {
+    const result = await pool.query(
+      "DELETE FROM posts WHERE post_id = $1 RETURNING *",
+      [postId]
+    );
+    if (result.rows.length > 0) {
+      res.status(200).json({ message: "Post deleted" });
+    } else {
+      res.status(404).json({ error: "Post not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
