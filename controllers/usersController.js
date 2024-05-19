@@ -72,6 +72,7 @@ exports.updateUser = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   const userId = req.params.id;
+  console.log(userId, "----------------------");
 
   try {
     const result = await pool.query("SELECT * FROM users WHERE user_id = $1", [
@@ -135,5 +136,42 @@ exports.deleteUserById = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" })
+  }
+};
+
+exports.getUsersByName = async (req, res) => {
+  const { first_name, last_name } = req.body;
+  
+  if (!first_name && !last_name) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  
+  try {
+    if (first_name !=undefined && last_name !== undefined) {
+      const result = await pool.query(
+        "SELECT username, first_name, last_name FROM users WHERE first_name = $1 AND last_name = $2",
+        [first_name, last_name]
+      );
+      res.status(200).json(result.rows);
+    }
+    else if(first_name){
+      console.log(first_name, last_name, "----------------------");
+      const result = await pool.query(
+        "SELECT username, first_name, last_name FROM users WHERE LOWER(first_name) like LOWER($1)",
+        [first_name]
+      );
+      console.log(result.rows, "----------------------");
+      res.status(200).json(result.rows);
+    }
+    else if(last_name){
+      const result = await pool.query(
+        "SELECT username, first_name, last_name FROM users WHERE LOWER(last_name) like LOWER($1)",
+        [last_name]
+      );
+      res.status(200).json(result.rows);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

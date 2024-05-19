@@ -8,17 +8,21 @@ const {
   getUserById,
   updateUserById,
   deleteUserById,
+  getUsersByName,
 } = require("../controllers/usersController");
 
 router
   .route("/")
   .get(authMiddleware, getUsers)
+  
   .post(authMiddleware, createUser);
-
-router
+  
+  router.route("/find").get(authMiddleware, getUsersByName);
+  
+  router
   .route("/:id")
   .get(authMiddleware, getUserById)
   .patch(authMiddleware, updateUserById)
   .delete(authMiddleware, deleteUserById);
-
+  
 module.exports = router;
