@@ -15,7 +15,6 @@ CREATE TABLE posts (
     content TEXT,
     media_type VARCHAR(50),
     media_url VARCHAR(255),
-    teacher_verified BOOLEAN,
     timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
