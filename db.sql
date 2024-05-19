@@ -3,21 +3,9 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-		first_name VARCHAR(100) NOT NULL,
-		last_name VARCHAR(100),
-    password VARCHAR(255) NOT NULL,
-);
-
--- Create table for student_users
-CREATE TABLE student_users (
-    user_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    dob DATE
-);
-
--- Create table for teacherusers
-CREATE TABLE teacher_users (
-    user_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    department VARCHAR(100)
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100),
+    password VARCHAR(255) NOT NULL
 );
 
 -- Create table for posts
@@ -45,19 +33,9 @@ CREATE TABLE likes (
     like_id SERIAL PRIMARY KEY,
     post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
     comment_id INT REFERENCES comments(comment_id) ON DELETE CASCADE,
-    user_id INT REFERENCES users (user_id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
--- Create table for messages
-CREATE TABLE messages (
-    message_id SERIAL PRIMARY KEY,
-    sender_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    receiver_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    content TEXT,
-    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
 
 -- Ensure that a user can only like a post once
 ALTER TABLE likes
