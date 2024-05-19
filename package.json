@@ -1,7 +1,9 @@
 {
   "name": "ys121_be_task",
   "version": "1.0.0",
-  "description": "a simple social media platform for the students",
+  "task": "toddle backend task",
+  "description": "a simple social media platform",
+  "github id": "yashasvini121",
   "main": "server.js",
   "scripts": {
     "start": "npx nodemon server.js",
