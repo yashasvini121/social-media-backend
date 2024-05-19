@@ -11,7 +11,7 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.createPost = async (req, res) => {
-  const { user_id, content, media_type, media_url, teacher_verified } =
+  const { user_id, content, media_type, media_url } =
     req.body;
 
   if (!user_id || !content) {
@@ -25,8 +25,8 @@ exports.createPost = async (req, res) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO posts (user_id, content, media_type, media_url, teacher_verified) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [user_id, content, media_type, media_url, teacher_verified]
+      "INSERT INTO posts (user_id, content, media_type, media_url) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [user_id, content, media_type, media_url]
     );
 
     res.status(201).json(result.rows[0]);
@@ -43,7 +43,7 @@ exports.createPost = async (req, res) => {
 
 exports.updatePostById = async (req, res) => {
   const postId = req.params.id;
-  const { content, media_type, media_url, teacher_verified } = req.body;
+  const { content, media_type, media_url } = req.body;
 
   const fields = [];
   const values = [];
@@ -60,10 +60,6 @@ exports.updatePostById = async (req, res) => {
   if (media_url !== undefined) {
     fields.push(`media_url = $${index++}`);
     values.push(media_url);
-  }
-  if (teacher_verified !== undefined) {
-    fields.push(`teacher_verified = $${index++}`);
-    values.push(teacher_verified);
   }
 
   if (fields.length === 0) {
