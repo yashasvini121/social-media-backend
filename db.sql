@@ -33,9 +33,6 @@ CREATE TABLE likes (
     post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
     comment_id INT REFERENCES comments(comment_id) ON DELETE CASCADE,
     user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_user_post_like UNIQUE (user_id, post_id)
 );
-
--- Ensure that a user can only like a post once
-ALTER TABLE likes
-ADD CONSTRAINT unique_user_post_like UNIQUE (user_id, post_id);
