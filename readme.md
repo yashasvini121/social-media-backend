@@ -1,4 +1,4 @@
-# Yashasvini Sharma | Toddle Backend Task Submission
+# Social Media Platform Backend
 
 ## Setup Instructions for Linux
 ### Follow the given step for setting up for the project for linux
