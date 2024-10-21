@@ -21,6 +21,7 @@
 ### Setting up the Project:
 1. Install the required dependencies
 `npm install`
+
 2. Start the server
 `npm start` or `node server.js`
 
