@@ -1,4 +1,3 @@
--- Create table for users
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -8,7 +7,6 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
--- Create table for posts
 CREATE TABLE posts (
     post_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
@@ -18,7 +16,6 @@ CREATE TABLE posts (
     timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create table for comments
 CREATE TABLE comments (
     comment_id SERIAL PRIMARY KEY,
     post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
@@ -27,7 +24,6 @@ CREATE TABLE comments (
     timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create table for likes
 CREATE TABLE likes (
     like_id SERIAL PRIMARY KEY,
     post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
